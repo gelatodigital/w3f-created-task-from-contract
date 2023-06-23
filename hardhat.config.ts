@@ -44,7 +44,7 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`
+        url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`
       },
     },
 
@@ -118,14 +118,14 @@ const config: HardhatUserConfig = {
 
   verify: {
     etherscan: {
-      apiKey: ETHERSCAN_KEY ? ETHERSCAN_KEY : "",
+      apiKey: ETHERSCAN_KEY || "",
     },
   },
 
   solidity: {
     compilers: [
       {
-        version: "0.8.17",
+        version: "0.8.19",
         settings: {
           optimizer: { enabled: true },
         },

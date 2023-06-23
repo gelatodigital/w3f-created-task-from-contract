@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.17;
+pragma solidity 0.8.19;
 
-import { Module, ModuleData } from "./Types.sol";
-import { AutomateTaskCreator } from "./AutomateTaskCreator.sol";
+import { Module, ModuleData } from "./vendor/Types.sol";
+import { AutomateTaskCreator } from "./vendor/AutomateTaskCreator.sol";
+import { IOpsProxy } from "./interfaces/IOpsProxy.sol";
+import { NATIVE_TOKEN } from "./constants/Tokens.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
-contract Random is AutomateTaskCreator {
+contract Oracle1Balance is AutomateTaskCreator {
     address public owner;
     uint256 public number;
     bytes32 public taskId;
 
     modifier onlyOwner {
-        require(msg.sender == owner, "Random.onlyOwner");
+        require(msg.sender == owner, "Oracle1Balance.onlyOwner");
         _;
     }
 
@@ -30,15 +33,15 @@ contract Random is AutomateTaskCreator {
         moduleData.args[0] = _proxyModuleArg();
         moduleData.args[1] = _web3FunctionModuleArg(
             cid,
-            abi.encode(address(this))
+            abi.encode(Strings.toHexString(address(this)))
         );
 
         bytes memory execData = abi.encodeWithSelector(
-            Random.setNumber.selector
+            IOpsProxy.batchExecuteCall.selector
         );
 
         taskId = _createTask(
-            address(this),
+            dedicatedMsgSender,
             execData,
             moduleData,
             address(0)
@@ -50,11 +53,10 @@ contract Random is AutomateTaskCreator {
     }
 
     function cancelTask() external onlyOwner {
-        require(taskId != 0, "Random.cancelTask: task not running");
+        require(taskId != 0, "Oracle1Balance.cancelTask: task not running");
         _cancelTask(taskId);
     }
 
-    // 1Balance does NOT yet support withdrawals - this feature will be added soon
     function depositFunds1Balance(address token, uint256 amount) external payable {
         _depositFunds1Balance(amount, token, address(this));
     }
