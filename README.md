@@ -28,6 +28,13 @@ If you'd like to use sync fee payment, ensure the contract is funded and then, i
 
 > **Warning**  
 > Ensure this function is using the ``onlyDedicatedMsgSender`` modifier, otherwise anyone will be able to call it and maliciously transfer a fee to themselves.
+
+## Get Beta access
+Web3 Function are currently in private beta.  
+In order to get access, please reach out to us [here](https://form.typeform.com/to/RrEiARiI)
+
+> **Note**  
+> Ensure the contract itself is whitelisted and not the deployer (EOA)
   
 ## Quick Start
 1. Install dependencies
