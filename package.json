@@ -2,17 +2,17 @@
   "name": "w3f-task-from-contract",
   "version": "1.0.0",
   "scripts": {
-    "build": "yarn clean && yarn install && yarn compile && npx tsc",
+    "build": "yarn install && yarn compile && npx tsc",
+    "clean": "yarn hardhat clean && rm -rf dist",
     "compile": "npx hardhat compile --force",
-    "clean": "rm -rf dist",
     "deploy": "npx hardhat deploy",
-    "format": "prettier --write */**/*.*{js,sol,json,md,ts}",
-    "format:check": "prettier --check */**/*.*{js,sol,json,md,ts}",
+    "test": "npx hardhat test",
+    "format": "prettier --write '*/**/*.*{js,json,md,ts}'",
+    "format:check": "prettier --check '*/**/*.*{js,json,md,ts}'",
     "lint": "eslint --cache . && yarn lint:sol",
     "lint:ts": "eslint -c .eslintrc.json --ext \"**/*.ts\" \"**/*.test.ts\"",
-    "lint:sol": "solhint contracts/**/*.sol",
-    "test": "npx hardhat test",
-    "verify": "npx hardhat etherscan-verify"
+    "lint:sol": "solhint 'contracts/**/*.sol'",
+    "postinstall": "yarn husky install"
   },
   "license": "ISC",
   "devDependencies": {
@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "@gelatonetwork/web3-functions-sdk": "^2.0.3",
+    "husky": "^8.0.3",
     "ky": "^0.33.2"
   }
 }
