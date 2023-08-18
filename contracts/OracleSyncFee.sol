@@ -44,6 +44,7 @@ contract OracleSyncFee is AutomateTaskCreator {
     function cancelTask() external onlyOwner {
         require(taskId != 0, "OracleSyncFee.cancelTask: task not running");
         _cancelTask(taskId);
+        taskId = 0;
     }
 
     function createTask(string memory cid) external onlyOwner {

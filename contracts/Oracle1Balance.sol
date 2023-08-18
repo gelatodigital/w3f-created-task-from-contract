@@ -34,6 +34,7 @@ contract Oracle1Balance is AutomateTaskCreator {
     function cancelTask() external onlyOwner {
         require(taskId != 0, "Oracle1Balance.cancelTask: task not running");
         _cancelTask(taskId);
+        taskId = 0;
     }
 
     function createTask(string memory cid) external onlyOwner {
