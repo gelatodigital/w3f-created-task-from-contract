@@ -1,7 +1,7 @@
 import { deployments, getNamedAccounts, w3f } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { AUTOMATE } from "../shared/constants";
+import { GELATO_ADDRESSES } from "@gelatonetwork/automate-sdk";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   if (hre.network.name !== "hardhat") {
@@ -18,7 +18,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   await deploy("Oracle1Balance", {
     from: deployer,
-    args: [AUTOMATE, cid],
+    args: [GELATO_ADDRESSES[1].automate, cid],
     log: hre.network.name !== "hardhat",
   });
 };

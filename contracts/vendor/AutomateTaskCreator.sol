@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.19;
+pragma solidity 0.8.21;
 
 import { AutomateReady } from "./AutomateReady.sol";
 import { ModuleData, IGelato1Balance } from "./Types.sol";

@@ -1,14 +1,17 @@
-import { Web3FunctionUserArgs, Web3FunctionResultV2 } from "@gelatonetwork/web3-functions-sdk";
 import { Web3FunctionHardhat } from "@gelatonetwork/web3-functions-sdk/hardhat-plugin";
-import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
-import { deployments, ethers, w3f } from "hardhat";
-import { expect, assert } from "chai";
+import { deployments, ethers, w3f, getNamedAccounts } from "hardhat";
 import { Oracle1Balance, IAutomate, IOpsProxy } from "../typechain";
-import { AUTOMATE, GELATO, ZERO } from "../shared/constants";
+import { GELATO_ADDRESSES } from "@gelatonetwork/automate-sdk";
+import { ZERO } from "../shared/constants";
+import { expect, assert } from "chai";
+import {
+  Web3FunctionUserArgs,
+  Web3FunctionResultV2,
+} from "@gelatonetwork/web3-functions-sdk";
 
 import {
   Gelato1BalanceParamStruct,
-  ModuleDataStruct
+  ModuleDataStruct,
 } from "../typechain/contracts/vendor/Types.sol/IAutomate";
 
 describe("Oracle1Balance", () => {
@@ -21,8 +24,14 @@ describe("Oracle1Balance", () => {
   before(async () => {
     await deployments.fixture();
 
-    await impersonateAccount(GELATO);
-    automate = await ethers.getContractAt("IAutomate", AUTOMATE, GELATO);
+    const { gelato: gelatoAddress } = await getNamedAccounts();
+    const gelato = await ethers.getSigner(gelatoAddress);
+
+    automate = (await ethers.getContractAt(
+      "IAutomate",
+      GELATO_ADDRESSES[1].automate,
+      gelato
+    )) as IAutomate;
 
     const { address: oracleAddress } = await deployments.get("Oracle1Balance");
     oracle = await ethers.getContractAt("Oracle1Balance", oracleAddress);
@@ -31,7 +40,7 @@ describe("Oracle1Balance", () => {
     cid = await oracleW3f.deploy();
 
     userArgs = {
-      contractAddress: oracleAddress
+      contractAddress: oracleAddress,
     };
   });
 
@@ -44,8 +53,7 @@ describe("Oracle1Balance", () => {
     const exec = await oracleW3f.run({ userArgs });
     const res = exec.result as Web3FunctionResultV2;
 
-    if (!res.canExec)
-      assert.fail(res.message);
+    if (!res.canExec) assert.fail(res.message);
 
     const callData = res.callData[0];
 
@@ -53,7 +61,7 @@ describe("Oracle1Balance", () => {
       ["string"],
       [oracle.address.toLowerCase()]
     );
-      
+
     const moduleData: ModuleDataStruct = {
       modules: [2, 4],
       args: [
@@ -61,8 +69,8 @@ describe("Oracle1Balance", () => {
         ethers.utils.defaultAbiCoder.encode(
           ["string", "bytes"],
           [cid, web3FunctionArgsHex]
-        )
-      ]
+        ),
+      ],
     };
 
     const oneBalanceParam: Gelato1BalanceParamStruct = {
@@ -71,11 +79,14 @@ describe("Oracle1Balance", () => {
       oneBalanceChainId: 0,
       nativeToFeeTokenXRateNumerator: 0,
       nativeToFeeTokenXRateDenominator: 0,
-      correlationId: "0x" + "0".repeat(64)
+      correlationId: "0x" + "0".repeat(64),
     };
 
     const proxyAddress = await oracle.dedicatedMsgSender();
-    const proxy = await ethers.getContractAt("IOpsProxy", proxyAddress) as IOpsProxy;
+    const proxy = (await ethers.getContractAt(
+      "IOpsProxy",
+      proxyAddress
+    )) as IOpsProxy;
 
     const batchExecuteCall = await proxy.populateTransaction.batchExecuteCall(
       [callData.to],
@@ -97,5 +108,5 @@ describe("Oracle1Balance", () => {
 
     const number = await oracle.number();
     expect(number).to.not.equal(0);
-  })
+  });
 });

@@ -1,11 +1,15 @@
-import { Web3FunctionUserArgs, Web3FunctionResultV2 } from "@gelatonetwork/web3-functions-sdk";
 import { Web3FunctionHardhat } from "@gelatonetwork/web3-functions-sdk/hardhat-plugin";
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
-import { deployments, ethers, w3f } from "hardhat";
-import { expect, assert } from "chai";
+import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { deployments, ethers, w3f, getNamedAccounts } from "hardhat";
 import { IAutomate, IOpsProxy, OracleSyncFee } from "../typechain";
-import { AUTOMATE, GELATO, NATIVE } from "../shared/constants";
+import { GELATO_ADDRESSES } from "@gelatonetwork/automate-sdk";
 import { ModuleDataStruct } from "../typechain/contracts/vendor/Types.sol/IAutomate";
+import { NATIVE } from "../shared/constants";
+import { expect, assert } from "chai";
+import {
+  Web3FunctionUserArgs,
+  Web3FunctionResultV2,
+} from "@gelatonetwork/web3-functions-sdk";
 
 describe("OracleSyncFee", () => {
   let automate: IAutomate;
@@ -17,8 +21,14 @@ describe("OracleSyncFee", () => {
   before(async () => {
     await deployments.fixture();
 
-    await impersonateAccount(GELATO);
-    automate = await ethers.getContractAt("IAutomate", AUTOMATE, GELATO);
+    const { gelato: gelatoAddress } = await getNamedAccounts();
+    const gelato = await ethers.getSigner(gelatoAddress);
+
+    automate = (await ethers.getContractAt(
+      "IAutomate",
+      GELATO_ADDRESSES[1].automate,
+      gelato
+    )) as IAutomate;
 
     const { address: oracleAddress } = await deployments.get("OracleSyncFee");
     oracle = await ethers.getContractAt("OracleSyncFee", oracleAddress);
@@ -27,7 +37,7 @@ describe("OracleSyncFee", () => {
     cid = await oracleW3f.deploy();
 
     userArgs = {
-      contractAddress: oracleAddress
+      contractAddress: oracleAddress,
     };
   });
 
@@ -40,8 +50,7 @@ describe("OracleSyncFee", () => {
     const exec = await oracleW3f.run({ userArgs });
     const res = exec.result as Web3FunctionResultV2;
 
-    if (!res.canExec)
-      assert.fail(res.message);
+    if (!res.canExec) assert.fail(res.message);
 
     const callData = res.callData[0];
 
@@ -49,7 +58,7 @@ describe("OracleSyncFee", () => {
       ["string"],
       [oracle.address.toLowerCase()]
     );
-      
+
     const moduleData: ModuleDataStruct = {
       modules: [2, 4],
       args: [
@@ -57,12 +66,15 @@ describe("OracleSyncFee", () => {
         ethers.utils.defaultAbiCoder.encode(
           ["string", "bytes"],
           [cid, web3FunctionArgsHex]
-        )
-      ]
+        ),
+      ],
     };
 
     const proxyAddress = await oracle.dedicatedMsgSender();
-    const proxy = await ethers.getContractAt("IOpsProxy", proxyAddress) as IOpsProxy;
+    const proxy = (await ethers.getContractAt(
+      "IOpsProxy",
+      proxyAddress
+    )) as IOpsProxy;
 
     const batchExecuteCall = await proxy.populateTransaction.batchExecuteCall(
       [callData.to],
@@ -73,10 +85,7 @@ describe("OracleSyncFee", () => {
     if (!batchExecuteCall.to || !batchExecuteCall.data)
       assert.fail("Invalid transaction");
 
-    await setBalance(
-      oracle.address,
-      ethers.utils.parseEther("1")
-    );
+    await setBalance(oracle.address, ethers.utils.parseEther("1"));
 
     await automate.exec(
       oracle.address,
@@ -91,5 +100,5 @@ describe("OracleSyncFee", () => {
 
     const number = await oracle.number();
     expect(number).to.not.equal(0);
-  })
+  });
 });

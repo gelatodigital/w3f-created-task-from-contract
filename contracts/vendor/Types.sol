@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.19;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.21;
 
 enum Module {
     RESOLVER,
@@ -58,14 +58,6 @@ interface IAutomate {
     function gelato() external view returns (address payable);
 
     function taskModuleAddresses(Module) external view returns (address);
-
-    function getTaskId(
-        address taskCreator,
-        address execAddress,
-        bytes4 execSelector,
-        ModuleData memory moduleData,
-        address feeToken
-    ) external pure returns (bytes32 taskId);
 }
 
 interface IProxyModule {
@@ -84,4 +76,8 @@ interface IGelato1Balance {
         address _token,
         uint256 _amount
     ) external;
+}
+
+interface IGelato {
+    function feeCollector() external view returns (address);
 }

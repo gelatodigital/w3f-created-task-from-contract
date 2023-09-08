@@ -4,12 +4,10 @@ import ky from "ky";
 
 import {
   Web3Function,
-  Web3FunctionContext
+  Web3FunctionContext,
 } from "@gelatonetwork/web3-functions-sdk";
 
-const abi = [
-  "function setNumber(uint256 _number)"
-];
+const abi = ["function setNumber(uint256 _number)"];
 
 Web3Function.onRun(async (context: Web3FunctionContext) => {
   const { userArgs, multiChainProvider } = context;
@@ -26,6 +24,6 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
 
   return {
     canExec: true,
-    callData: [{ to: tx.to, data: tx.data }]
+    callData: [{ to: tx.to, data: tx.data }],
   };
 });
