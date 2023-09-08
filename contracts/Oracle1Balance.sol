@@ -20,7 +20,7 @@ contract Oracle1Balance is AutomateTaskCreator {
     constructor(
         address automate,
         string memory cid
-    ) AutomateTaskCreator(automate, address(0)) {
+    ) AutomateTaskCreator(automate) {
         owner = msg.sender;
         _createOracleTask(cid);
     }
