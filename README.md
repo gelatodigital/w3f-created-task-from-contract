@@ -26,14 +26,14 @@ There are three ways to handle fee payment:
 Implementation is as simple as inheriting from ``AutomateTaskCreator`` and calling ``_createTask`` with the appropriate arguments.
 If you'd like to use sync fee payment, ensure the contract is funded and then, in your automated function, [transfer the fee](https://github.com/gelatodigital/w3f-task-from-contract/blob/main/contracts/OracleSyncFee.sol#L57-L58) using ``_getFeeDetails`` and ``_transfer``.
 
-> **Warning**  
+> [!WARNING]
 > Ensure this function is using the ``onlyDedicatedMsgSender`` modifier, otherwise anyone will be able to call it and maliciously transfer a fee to themselves.
 
 ## Get Beta access
 Web3 Function are currently in private beta.  
 In order to get access, please reach out to us [here](https://form.typeform.com/to/RrEiARiI)
 
-> **Note**  
+> [!NOTE]
 > Ensure the contract itself is whitelisted and not the deployer (EOA)
   
 ## Quick Start
